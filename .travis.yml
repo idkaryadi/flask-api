@@ -13,14 +13,14 @@ before_script:
 - eval "$(ssh-agent -s)"
 - chmod 600 deploy_rsa
 - ssh-add deploy_rsa
-- sudo docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+- docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
 script:
 - sudo chmod +x deploy.sh
 - sudo chmod 600 deploy_rsa
 after_script:
-- sudo docker build -t ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID} .
-- sudo docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
-- sudo docker tag ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
+- docker build -t ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID} .
+- docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
+- docker tag ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
   ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
 - sudo docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:latest
 - ssh-keyscan -H $SSH_IP >> ~/.ssh/known_hosts
