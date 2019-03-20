@@ -24,4 +24,4 @@ after_script:
   ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
 - sudo docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:latest
 - ssh-keyscan -H $SSH_IP >> ~/.ssh/known_hosts
-- ssh -v -i deploy_rsa $SSH_USER@$SSH_IP DIR=$ROOT_DIR 'bash-s' < deploy.sh
+- ssh -v -i deploy_rsa $SSH_USER@$SSH_IP DIR=$ROOT_DIR 'bash -s' < deploy.sh
