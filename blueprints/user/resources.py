@@ -5,7 +5,7 @@ from blueprints import db
 from flask_jwt_extended import jwt_required, get_jwt_claims
 from blueprints.auth import *
 from blueprints.client import *
-# from blueprints.user import *
+from blueprints.user import *
 import math as ma
 
 from . import *
@@ -83,7 +83,7 @@ class UserTransactionDetailsResource(Resource):
         if id is None:
             parser = reqparse.RequestParser()
             parser.add_argument('p', type=int, location = 'args', default = 1)
-            parser.add_argument('rp', type=int, location = 'args', default = 5)
+            parser.add_argument('rp', type=int, location = 'args', default = 20)
 
             args = parser.parse_args()
 
@@ -113,7 +113,6 @@ class UserTransactionDetailsResource(Resource):
             rows = []
             for row in qry.all():
                 rows.append(marshal(row, Transaction_Details.respond_field))
-            
             return {"status": "oke", "data":rows}, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
@@ -135,12 +134,16 @@ class UserTransactionDetailsResource(Resource):
         qry = Products.query.get(product_id)
         price = qry.price
 
+        # add point
+        qry.point = qry.point + 1
+        kategori = Product_Types.query.get(qry.product_type_id)
+        kategori.point = kategori.point + 1
+
         # set new qty for Product
         if args["qty"] > int(qry.qty) :
             return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
         sisa_qty = qry.qty - args["qty"]
         qry.qty = sisa_qty
-        # Akhir dari Tambahan
 
         # get transcation id
         user_id = jwtClaims["id"]
@@ -282,7 +285,8 @@ class UserTransactionsResource(Resource):
             
             return output, 200, {'Content-Text':'application/json'}
         else:
-            qry = Transactions.query.filter_by(user_id = user_id).filter_by(transaction_id=id)
+            # qry = Transactions.query.filter_by(user_id = user_id).filter_by(transaction_id=id)
+            qry = Transactions.query.filter_by(user_id = user_id).get(id)
             output = dict()
             if qry is not None:
                 output["status"] = "oke"

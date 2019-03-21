@@ -17,7 +17,7 @@ class PublicResource(Resource):
     def get(self, id = None):
         parser = reqparse.RequestParser()
         parser.add_argument('p', type=int, location = 'args', default = 1)
-        parser.add_argument('rp', type=int, location = 'args', default = 5)
+        parser.add_argument('rp', type=int, location = 'args', default = 20)
         parser.add_argument('q', location = 'args', default = "")
         args = parser.parse_args()
 
@@ -27,12 +27,13 @@ class PublicResource(Resource):
             qry = Products.query
             if args['q'] is not "":
                 qry = qry.filter_by(nama=args['q'])
-                output["pencarian"] = args['q']
+                # output["pencarian"] = args['q']
                 
             rows = []
             for row in qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Products.respond_field))
             
+            output["status"] = "oke"
             output["page"] = args['p']
             output["total_page"] = 6 # round(Products.count()/args['rp'])
             output["per_page"] = args['rp']
@@ -40,18 +41,11 @@ class PublicResource(Resource):
             
             return output, 200, {'Content-Text':'application/json'}
         else:
-            # qry = Products.query.get(id)
-            qry = Products.query.filter_by(client_id=id)
-            
-            rows = []
-            for row in qry.limit(args['rp']).offset(offset).all():
-                rows.append(marshal(row, Products.respond_field))
+            qry = Products.query.get(id)
 
             if qry is not None:
-                output["page"] = args['p']
-                output["total_page"] = 6 # round(len(Products)/args['rp'])
-                output["per_page"] = args['rp']
-                output["hasil"] = rows # marshal(qry, Products.respond_field)
+                output['status'] = 'oke'
+                output["data"] = marshal(qry, Products.respond_field)
                 return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
@@ -74,3 +68,20 @@ class PublicResource(Resource):
         return {"status": "oke", "data":marshal(new_row, Users.respond_field)}, 200, {'Content-Text':'application/json'}
 
 api.add_resource(PublicResource, '/public', '/public/<int:id>')
+
+class PublicProductTypeResource(Resource):
+
+    def get(self, id):
+        qry = Products.query.filter_by(product_type_id=id)
+        
+        rows = []
+        for row in qry.all():
+            rows.append(marshal(row, Products.respond_field))
+        output = dict()
+        if qry is not None:
+            output["status"] = "oke"
+            output["data"] = rows # marshal(qry, Products.respond_field)
+            return output, 200, {'Content-Text':'application/json'} 
+        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+api.add_resource(PublicProductTypeResource, '/public/kategori/<int:id>')

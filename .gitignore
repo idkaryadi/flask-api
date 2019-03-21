@@ -4,6 +4,7 @@
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 
@@ -77,6 +78,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.vscode
 
 # IPython
 profile_default/
@@ -120,5 +122,5 @@ dmypy.json
 
 ### Python Patch ###
 .venv/
-
+migrations/
 # End of https://www.gitignore.io/api/python

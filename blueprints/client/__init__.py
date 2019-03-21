@@ -13,10 +13,11 @@ class Products(db.Model):
     price = db.Column(db.Integer, nullable=False)
     satuan = db.Column(db.String(255), nullable = False)
     status = db.Column(db.String(255), nullable=False)
-    url_picture = db.Column(db.String(255))
+    url_picture = db.Column(db.Text)
     qty = db.Column(db.Integer, nullable=False)
     # berat = db.Column(db.Integer) pindah ke product_descriptions
     client_id = db.Column(db.Integer, nullable=False)
+    point = db.Column(db.Integer)
     # created_at = db.Column(db.DataTime)
     # updated_at = db.Column(db.DataTime)
     # deleted_at = db.Column(db.DataTime)
@@ -33,15 +34,16 @@ class Products(db.Model):
         'url_picture' : fields.String,
         'qty' : fields.Integer,
         # 'berat' : fields.Integer,
-        'client_id' : fields.Integer
+        'client_id' : fields.Integer,
+        'point' : fields.String
         # 'created_at' : fields.DataTime,
         # 'updated_at' : fields.DataTime,
         # 'deleted_at' : fields.DataTime
         }
 
     def __init__(
-        self, id, nama, deskripsi, product_type_id, price, satuan, status, url_picture, qty, client_id
-        ): # created_at, updated_at, deleted_at
+        self, id, nama, deskripsi, product_type_id, price, satuan, status, url_picture, qty, client_id,
+        point): # created_at, updated_at, deleted_at
         self.id = id
         self.nama = nama
         self.deskripsi = deskripsi
@@ -52,6 +54,7 @@ class Products(db.Model):
         self.url_picture = url_picture
         self.qty = qty
         self.client_id = client_id
+        self.point = point
         # self.created_at = created_at
         # self.updated_at = updated_at
         # self.deleted_at = deleted_at
@@ -64,23 +67,26 @@ class Product_Types(db.Model):
     __tablename__="Product_Types"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True) 
     nama = db.Column(db.String(255), nullable=False)
+    point = db.Column(db.Integer)
     # created_at = db.Column(db.DataTime)
     # updated_at = db.Column(db.DataTime)
     # deleted_at = db.Column(db.DataTime)
 
     respond_field = {
         'id' : fields.Integer,
-        'nama' : fields.String
+        'nama' : fields.String,
+        'point' : fields.String
         # 'created_at' : fields.DataTime,
         # 'updated_at' : fields.DataTime,
         # 'deleted_at' : fields.DataTime
         }
 
     def __init__(
-        self, id, nama
+        self, id, nama, point
         ): # created_at, updated_at, deleted_at
         self.id = id
         self.nama = nama
+        self.point = point
         # self.created_at = created_at
         # self.updated_at = updated_at
         # self.deleted_at = deleted_at

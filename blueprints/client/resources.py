@@ -86,7 +86,7 @@ class ClientProductsResource(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument('p', type=int, location = 'args', default = 1)
-        parser.add_argument('rp', type=int, location = 'args', default = 5)
+        parser.add_argument('rp', type=int, location = 'args', default = 20)
         parser.add_argument('q', location = 'args', default = "")
 
         args = parser.parse_args()
@@ -146,7 +146,7 @@ class ClientProductsResource(Resource):
 
         product = Products(
             None, args['nama'], args['deskripsi'], args['product_type_id'], args['price'],
-            args['satuan'], args['status'], args['url_picture'], args['qty'], client_id)
+            args['satuan'], args['status'], args['url_picture'], args['qty'], client_id, 0)
         db.session.add(product)
         db.session.commit()
         qry = Products.query.filter_by(client_id=client_id).order_by(Products.id.desc()).first()
@@ -302,16 +302,12 @@ class ClientTransactionResource(Resource):
 
 api.add_resource(ClientTransactionResource, '/client/transaction/<int:id>')
 
-class ClientProductTypeResource(Resource):
-    # @jwt_required
+class ProductTypeResource(Resource):
     def get(self, id = None):
-        # jwtClaims = get_jwt_claims()
-        # if jwtClaims['status'] is not 'client':
-        #     return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-    
+ 
         parser = reqparse.RequestParser()
         parser.add_argument('p', type=int, location = 'args', default = 1)
-        parser.add_argument('rp', type=int, location = 'args', default = 5)
+        parser.add_argument('rp', type=int, location = 'args', default = 20)
         parser.add_argument('q', location = 'args', default = "")
 
         args = parser.parse_args()
@@ -328,11 +324,12 @@ class ClientProductTypeResource(Resource):
         for row in qry.limit(args['rp']).offset(offset).all():
             rows.append(marshal(row, Product_Types.respond_field))
         
+        output["status"] = "oke"
         output["page"] = args['p']
         output["total_page"] = 6 # round(Products.count()/args['rp'])
         output["per_page"] = args['rp']
-        output["hasil"] = rows
+        output["data"] = rows
         
         return output, 200, {'Content-Text':'application/json'}
 
-api.add_resource(ClientProductTypeResource, '/client/product_type')
+api.add_resource(ProductTypeResource, '/product_type')
