@@ -7,7 +7,6 @@ env:
   global:
   - DOCKER_IMAGE_NAME="helloworld"
   - DOCKER_HUB_ORG="idkaryadi"
-
 before_script:
 - openssl aes-256-cbc -K $encrypted_c000e4d3c897_key -iv $encrypted_c000e4d3c897_iv -in deploy_rsa.enc -out deploy_rsa -d
 - eval "$(ssh-agent -s)"
@@ -18,7 +17,8 @@ script:
 - sudo chmod +x deploy.sh
 - sudo chmod 600 deploy_rsa
 after_script:
-- docker build -t ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID} .
+- docker build -t ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
+  .
 - docker push ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
 - docker tag ${DOCKER_HUB_ORG}/${DOCKER_IMAGE_NAME}:production-${TRAVIS_BUILD_ID}
   ${DOCKER_USERNAME}/${DOCKER_IMAGE_NAME}:latest
