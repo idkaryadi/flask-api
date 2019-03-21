@@ -8,6 +8,7 @@ from blueprints.client import Products, Product_Types
 from flask_jwt_extended import jwt_required, get_jwt_claims
 from werkzeug.security import generate_password_hash, \
     check_password_hash
+import math as ma
 
 from . import *
 
@@ -91,7 +92,7 @@ class ClientProductsResource(Resource):
         args = parser.parse_args()
 
         offset = (args['p'] * args['rp']) - args['rp']
-        
+    
         output = dict()
 
         if id is None:
@@ -101,11 +102,14 @@ class ClientProductsResource(Resource):
                 output["pencarian"] = args['q']
                 
             rows = []
+            total_page = 0
             for row in qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Products.respond_field))
+                total_page = total_page +1
+
             output['status'] = 'oke'
             output["page"] = args['p']
-            output["total_page"] = (len(Products)/args['rp']).scalar()
+            output["total_page"] = ma.ceil(total_page/args['rp'])
             output["per_page"] = args['rp']
             output["data"] = rows
             
@@ -129,20 +133,20 @@ class ClientProductsResource(Resource):
 
         client_id = jwtClaims['id']
         parser = reqparse.RequestParser()
-        parser.add_argument('nama', location = 'json')
-        parser.add_argument('vendor', location = 'json')
+        parser.add_argument('nama', location = 'json', required = True)
         parser.add_argument('deskripsi', location = 'json')
-        parser.add_argument('product_type_id', location = 'json')
-        parser.add_argument('price', location = 'json')
-        parser.add_argument('status', location = 'json')
+        parser.add_argument('product_type_id', location = 'json', required = True)
+        parser.add_argument('price', location = 'json', required = True)
+        parser.add_argument('satuan', location = 'json', required = True)
+        parser.add_argument('status', location = 'json', required = True)
         parser.add_argument('url_picture', location = 'json')
-        parser.add_argument('qty', location = 'json')
+        parser.add_argument('qty', location = 'json', required = True)
 
         args = parser.parse_args()
 
         product = Products(
-            None, args['nama'], args['vendor'], args['deskripsi'], args['product_type_id'], args['price'],
-            args['status'], args['url_picture'], args['qty'], client_id)
+            None, args['nama'], args['deskripsi'], args['product_type_id'], args['price'],
+            args['satuan'], args['status'], args['url_picture'], args['qty'], client_id)
         db.session.add(product)
         db.session.commit()
         qry = Products.query.filter_by(client_id=client_id).order_by(Products.id.desc()).first()
@@ -156,10 +160,10 @@ class ClientProductsResource(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument('nama', location = 'json')
-        parser.add_argument('vendor', location = 'json')
         parser.add_argument('deskripsi', location = 'json')
         parser.add_argument('product_type_id', location = 'json')
         parser.add_argument('price', location = 'json')
+        parser.add_argument('satuan', location = 'json')
         parser.add_argument('status', location = 'json')
         parser.add_argument('url_picture', location = 'json')
         parser.add_argument('qty', location = 'json')
@@ -172,14 +176,14 @@ class ClientProductsResource(Resource):
         # qry.deskripsi = args['deskripsi']
         if args['nama'] is not None:
             qry.nama = args['nama']
-        if args['vendor'] is not None:
-            qry.vendor = args['vendor']
         if args['deskripsi'] is not None:
             qry.deskripsi = args['deskripsi']
         if args['product_type_id'] is not None:
             qry.product_type_id = args['product_type_id']
         if args['price'] is not None:
             qry.price = args['price']
+        if args['satuan'] is not None:
+            qry.satuan = args['satuan']
         if args['status'] is not None:
             qry.status = args['status']
         if args['url_picture'] is not None:

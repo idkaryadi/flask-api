@@ -6,6 +6,8 @@ from flask_jwt_extended import jwt_required, get_jwt_claims
 from blueprints.auth import *
 from blueprints.client import *
 # from blueprints.user import *
+import math as ma
+
 from . import *
 
 bp_user = Blueprint('User', __name__)
@@ -49,7 +51,7 @@ class UserResource(Resource):
             qry.password = args["password"]
         
         db.session.commit()
-        return {"status": "Success Updated User Data", 'data':marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
+        return {"status": "oke", 'data':marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
     
     @jwt_required
     def delete(self):
@@ -65,7 +67,7 @@ class UserResource(Resource):
 
         db.session.delete(qry)
         db.session.commit()
-        return {"status": "Success deleted", 'data':marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
+        return {"status": "oke", 'data':marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
 
 api.add_resource(UserResource, '/user')
 
@@ -91,26 +93,28 @@ class UserTransactionDetailsResource(Resource):
             qry = Transaction_Details.query
                 
             rows = []
+            total_page = 0
             for row in qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Transaction_Details.respond_field))
-            
+                # total_page = total_page + 1
+
             output["status"] = "oke"
             output["page"] = args['p']
-            output["total_page"] = 6 # round(Transaction_Details.count()/args['rp'])
+            output["total_page"] = ma.floor(total_page/2) # 6 round(Transaction_Details.count()/args['rp'])
             output["per_page"] = args['rp']
             output["data"] = rows
             
             return output, 200, {'Content-Text':'application/json'}
         else:
-            qry = Transaction_Details.query.get(id)
-            output = dict()
-            if qry is not None:
-                # output["page"] = args['p']
-                # output["total_page"] = 6 # round(len(Ta)/args['rp'])
-                # output["per_page"] = args['rp']
-                # output["hasil"] = marshal(qry, Transaction_Details.respond_field)
-                # return output, 200, {'Content-Text':'application/json'}
-                return {"status": "oke", "data":marshal(qry, Transaction_Details.respond_field)}, 200, {'Content-Text':'application/json'} 
+            qry = Transaction_Details.query.filter_by(transaction_id = id)
+            if qry is None:
+                return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+            rows = []
+            for row in qry.all():
+                rows.append(marshal(row, Transaction_Details.respond_field))
+            
+            return {"status": "oke", "data":rows}, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
     @jwt_required
@@ -120,7 +124,7 @@ class UserTransactionDetailsResource(Resource):
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
 
         parser = reqparse.RequestParser()
-        # Bagaimana menghandle tranasaction_id
+        # Bagaimana menghandle transaction_id
         # parser.add_argument('transaction_id', location = 'json')
         parser.add_argument('product_id', location = 'json')
         parser.add_argument('qty', type = int, location = 'json')
@@ -131,22 +135,26 @@ class UserTransactionDetailsResource(Resource):
         qry = Products.query.get(product_id)
         price = qry.price
 
-        # Tambahan
-        # if args["qty"] > int(qry.qty) :
-        #     return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
-        # sisa_qty = qry.qty - args["qty"]
-        # qry.qty = sisa_qty
+        # set new qty for Product
+        if args["qty"] > int(qry.qty) :
+            return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
+        sisa_qty = qry.qty - args["qty"]
+        qry.qty = sisa_qty
         # Akhir dari Tambahan
-
 
         # get transcation id
         user_id = jwtClaims["id"]
         transaction = Transactions.query.filter_by(user_id=user_id).order_by(Transactions.id.desc()).first()
-        if transaction is None or transaction.status_pembayaran is True:
-            transaction = Transactions(None, user_id, None, None, False)
+        if transaction is None or transaction.status_pembayaran == 'Lunas':
+            transaction = Transactions(None, user_id, 0, 0, "Belum Lunas")
             db.session.add(transaction)
             transaction = Transactions.query.filter_by(user_id=user_id).order_by(Transactions.id.desc()).first()
+        
         transaction_id = transaction.id
+        # transaction_total_qty = transaction.total_qty
+        # transaction_total_price = transaction.total_price
+        transaction.total_qty = transaction.total_qty + args["qty"]
+        transaction.total_price = transaction.total_price + (args["qty"]*price)
 
         #save data
         transaction_detail = Transaction_Details(None, transaction_id, args['product_id'], args['qty'], price)
@@ -172,8 +180,8 @@ class UserTransactionDetailsResource(Resource):
         # price = qry.price
         # print(price)
 
-        newqry = Transaction_Details.query.get(id)
-        if newqry is None:
+        qry = Transaction_Details.query.get(id)
+        if qry is None:
             return {"status": "NOT_FOUND"}, 404, {'Content-Text':'application/json'}
         
         # if args['product_id'] is not None:
@@ -185,12 +193,27 @@ class UserTransactionDetailsResource(Resource):
 
             # newqry.product_id = args['product_id']
             # newqry.price = price
-
-        if args['qty'] is not None:
-            newqry.qty = args['qty']
         
+        # get qty from product and set it back
+        product_id = qry.product_id
+        product = Products.query.get(product_id)
+
+        transaction_id = qry.transaction_id
+        transaction = Transactions.query.get(transaction_id)
+        if transaction.status_pembayaran == "Lunas":
+            return {"status": "Data tidak bisa di edit"}, 404, {'Content-Text':'application/json'}
+        
+        selisih = qry.qty - args['qty']
+        sisa_qty = product.qty - selisih
+        if sisa_qty>=0:
+            product.qty = sisa_qty
+            transaction.total_qty = transaction.total_qty - (qry.qty + args['qty'])
+            transaction.total_price = transaction.total_price - (product.price * (qry.qty - args['qty'])) 
+            qry.qty = args['qty']
+        else:
+            return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
         db.session.commit()
-        return {"status": "oke", "data":marshal(newqry, Transaction_Details.respond_field)}, 200, {'Content-Text':'application/json'}    
+        return {"status": "oke", "data":marshal(qry, Transaction_Details.respond_field)}, 200, {'Content-Text':'application/json'}    
     
     @jwt_required
     def delete(self, id):
@@ -201,11 +224,19 @@ class UserTransactionDetailsResource(Resource):
         qry = Transaction_Details.query.get(id)
         if qry is None:
             return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-        # Tambahan 
-        # product_id = qry.product_id
-        # product_qry = Products.query.get(product_id)
-        # product_qry.qty = product_qry.qty + qry.qty
-        # Akhir dari Tambahan
+        
+        # edit transaction
+        transaction = Transactions.query.get(qry.transaction_id)
+        if transaction.status_pembayaran == "Lunas":
+            return {"status": "Data tidak bisa di edit"}, 404, {'Content-Text':'application/json'}
+
+        transaction.total_qty = transaction.total_qty - qry.qty
+        transaction.total_price = transaction.total_price - (qry.qty * qry.price)
+
+        # Adding qty in product
+        product_id = qry.product_id
+        product_qry = Products.query.get(product_id)
+        product_qry.qty = product_qry.qty + qry.qty
 
         db.session.delete(qry)
         db.session.commit()
@@ -238,25 +269,27 @@ class UserTransactionsResource(Resource):
             qry = Transactions.query.filter_by(user_id = user_id)
                 
             rows = []
+            total_pages = 0
             for row in qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Transactions.respond_field))
-            
+                total_pages = total_pages + 1
+
             output["status"] = "oke"
             output["page"] = args['p']
-            output["total_page"] = 6 # round(Transactions.count()/args['rp'])
+            output["total_page"] = ma.ceil(total_pages/args['rp']) #6 # round(Transactions.count()/args['rp'])
             output["per_page"] = args['rp']
             output["data"] = rows
             
             return output, 200, {'Content-Text':'application/json'}
         else:
-            qry = Transactions.query.filter_by(user_id = user_id).get(id)
+            qry = Transactions.query.filter_by(user_id = user_id).filter_by(transaction_id=id)
             output = dict()
             if qry is not None:
                 output["status"] = "oke"
                 # output["page"] = args['p']
                 # output["total_page"] = 6 # round(len(Ta)/args['rp'])
                 # output["per_page"] = args['rp']
-                output["hasil"] = marshal(qry, Transactions.respond_field)
+                output["data"] = marshal(qry, Transactions.respond_field)
                 return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
@@ -276,9 +309,9 @@ class UserTransactionsResource(Resource):
         if newqry is None:
             return {"status": "NOT_FOUND"}, 404, {'Content-Text':'application/json'}
         print("BEFORE", newqry.status_pembayaran)
-        if args['code_pembayaran'] == (username + '123') and newqry.status_pembayaran == False:
-            newqry.status_pembayaran = True
-        elif newqry.status_pembayaran == True:
+        if args['code_pembayaran'] == (username + '123') and newqry.status_pembayaran == "Belum Lunas":
+            newqry.status_pembayaran = "Lunas"
+        elif newqry.status_pembayaran == "Lunas":
             return {"status": "Pembayaran telah dilunasi sebelumnya"}, 200, {'Content-Text':'application/json'}    
 
         db.session.commit()
@@ -295,7 +328,13 @@ class UserTransactionsResource(Resource):
         # newqry = Transaction_Details.query.filter_by(transaction_id=id)
         if qry is None:
             return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-        if qry.status_pembayaran == False:
+        if qry.status_pembayaran == "Belum Lunas":
+            td_qry = Transaction_Details.query.filter_by(transaction_id=id)
+            for row in td_qry.all():
+                product_id = row.product_id
+                product = Products.query.get(product_id)
+                product.qty = product.qty + row.qty
+                db.session.delete(row)
             db.session.delete(qry)
         # if newqry is not None:
         #     for qry in newqry.all():

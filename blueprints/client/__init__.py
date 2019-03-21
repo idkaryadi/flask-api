@@ -7,12 +7,12 @@ class Products(db.Model):
     __tablename__="Products"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True) 
     nama = db.Column(db.String(255), nullable=False)
-    # vendor = db.Column(db.String(255))
     # buat deskripsi, nanti di cari tahu lagi
     deskripsi = db.Column(db.Text)
     product_type_id = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(255))
+    satuan = db.Column(db.String(255), nullable = False)
+    status = db.Column(db.String(255), nullable=False)
     url_picture = db.Column(db.String(255))
     qty = db.Column(db.Integer, nullable=False)
     # berat = db.Column(db.Integer) pindah ke product_descriptions
@@ -24,11 +24,11 @@ class Products(db.Model):
     respond_field = {
         'id' : fields.Integer,
         'nama' : fields.String,
-        # 'vendor' : fields.String,
         # buat deskripsi, nanti di cari tahu lagi
         'deskripsi' : fields.String,
         'product_type_id' : fields.Integer,
         'price' : fields.Integer,
+        'satuan' : fields.String,
         'status' : fields.String,
         'url_picture' : fields.String,
         'qty' : fields.Integer,
@@ -40,14 +40,14 @@ class Products(db.Model):
         }
 
     def __init__(
-        self, id, nama, deskripsi, product_type_id, price, status, url_picture, qty, client_id
+        self, id, nama, deskripsi, product_type_id, price, satuan, status, url_picture, qty, client_id
         ): # created_at, updated_at, deleted_at
         self.id = id
         self.nama = nama
-        # self.vendor = vendor
         self.deskripsi = deskripsi
         self.product_type_id = product_type_id
         self.price = price
+        self.satuan = satuan
         self.status = status
         self.url_picture = url_picture
         self.qty = qty
