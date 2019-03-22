@@ -24,7 +24,7 @@ class PublicResource(Resource):
         offset = (args['p'] * args['rp']) - args['rp']
         output = dict()
         if id is None: 
-            qry = Products.query
+            qry = Products.query.query.order_by(Products.point.desc())
             if args['q'] is not "":
                 qry = qry.filter_by(nama=args['q'])
                 # output["pencarian"] = args['q']
@@ -99,7 +99,8 @@ class PublicProductTypeResource(Resource):
         offset = (args['p'] * args['rp']) - args['rp']
         
         output = dict()
-        qry = Product_Types.query
+        qry = Product_Types.query.order_by(Product_Types.point.desc())
+           
         if args['q'] is not "":
             qry = qry.filter_by(nama=args['q'])
             output["pencarian"] = args['q']

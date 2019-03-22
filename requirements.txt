@@ -6,3 +6,4 @@ flask-script
 pymysql
 flask-jwt-extended
 requests
+flask-cors
