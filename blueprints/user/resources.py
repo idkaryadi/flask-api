@@ -90,11 +90,13 @@ class UserTransactionDetailsResource(Resource):
             offset = (args['p'] * args['rp']) - args['rp']
             
             output = dict()
-            qry = Transaction_Details.query
-                
+            user_id = jwtClaims["id"]
+            qry = Transactions.query.filter_by(user_id = user_id).order_by(Transactions.id.desc()).first()
+            td_qry = Transaction_Details.query.filter_by(transaction_id = qry.id)
+            
             rows = []
             total_page = 0
-            for row in qry.limit(args['rp']).offset(offset).all():
+            for row in td_qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Transaction_Details.respond_field))
                 # total_page = total_page + 1
 
@@ -125,7 +127,7 @@ class UserTransactionDetailsResource(Resource):
         parser = reqparse.RequestParser()
         # Bagaimana menghandle transaction_id
         # parser.add_argument('transaction_id', location = 'json')
-        parser.add_argument('product_id', location = 'json')
+        parser.add_argument('product_id', type = int, location = 'json')
         parser.add_argument('qty', type = int, location = 'json')
         args = parser.parse_args()
 
@@ -151,6 +153,7 @@ class UserTransactionDetailsResource(Resource):
         if transaction is None or transaction.status_pembayaran == 'Lunas':
             transaction = Transactions(None, user_id, 0, 0, "Belum Lunas")
             db.session.add(transaction)
+            # db.session.commit()
             transaction = Transactions.query.filter_by(user_id=user_id).order_by(Transactions.id.desc()).first()
         
         transaction_id = transaction.id
@@ -175,7 +178,7 @@ class UserTransactionDetailsResource(Resource):
         parser = reqparse.RequestParser()
         # yang bisa di ganti cuma jumlahnya aja
         # parser.add_argument('product_id', location = 'json')
-        parser.add_argument('qty', location = 'json')
+        parser.add_argument('qty', type=int, location = 'json')
         args = parser.parse_args()
 
         # product_id = args['product_id']
@@ -187,16 +190,6 @@ class UserTransactionDetailsResource(Resource):
         if qry is None:
             return {"status": "NOT_FOUND"}, 404, {'Content-Text':'application/json'}
         
-        # if args['product_id'] is not None:
-        #     # Tambahan
-        #     product_id = newqry.product_id
-        #     qry = Products.query.get(product_id)
-        #     qry.qty = qry.qty + newqry.qty
-            # Akhir dari Tambahan
-
-            # newqry.product_id = args['product_id']
-            # newqry.price = price
-        
         # get qty from product and set it back
         product_id = qry.product_id
         product = Products.query.get(product_id)
@@ -207,11 +200,11 @@ class UserTransactionDetailsResource(Resource):
             return {"status": "Data tidak bisa di edit"}, 404, {'Content-Text':'application/json'}
         
         selisih = qry.qty - args['qty']
-        sisa_qty = product.qty - selisih
-        if sisa_qty>=0:
-            product.qty = sisa_qty
-            transaction.total_qty = transaction.total_qty - (qry.qty + args['qty'])
-            transaction.total_price = transaction.total_price - (product.price * (qry.qty - args['qty'])) 
+        sisa_di_prod = product.qty + selisih
+        if sisa_di_prod>=0:
+            product.qty = sisa_di_prod
+            transaction.total_qty = transaction.total_qty + (args['qty'] - qry.qty)
+            transaction.total_price = transaction.total_price + (product.price * (args['qty'] - qry.qty))
             qry.qty = args['qty']
         else:
             return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
@@ -312,14 +305,14 @@ class UserTransactionsResource(Resource):
         newqry = Transactions.query.get(id)
         if newqry is None:
             return {"status": "NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-        print("BEFORE", newqry.status_pembayaran)
+        # print("BEFORE", newqry.status_pembayaran)
         if args['code_pembayaran'] == (username + '123') and newqry.status_pembayaran == "Belum Lunas":
             newqry.status_pembayaran = "Lunas"
         elif newqry.status_pembayaran == "Lunas":
             return {"status": "Pembayaran telah dilunasi sebelumnya"}, 200, {'Content-Text':'application/json'}    
 
         db.session.commit()
-        print("AFTER", newqry.status_pembayaran)
+        # print("AFTER", newqry.status_pembayaran)
         return {"status": "Payment Success", "data":marshal(newqry, Transactions.respond_field)}, 200, {'Content-Text':'application/json'}
     
     @jwt_required
@@ -345,6 +338,7 @@ class UserTransactionsResource(Resource):
         #         db.session.delete(qry)
             db.session.commit()
             return {"status": "oke", "data":marshal(qry,Transactions.respond_field)}, 200, {'Content-Text':'application/json'}
+        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
 api.add_resource(UserTransactionsResource, '/user/transaction', '/user/transaction/<int:id>')
 

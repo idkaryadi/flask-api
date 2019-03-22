@@ -41,9 +41,10 @@ class AdminUserResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location = 'json')
         parser.add_argument('password', location = 'json')
+        parser.add_argument('status', location = 'json')
         args = parser.parse_args()
 
-        user = Users(None, args['username'], args['password'], "user")
+        user = Users(None, args['username'], args['password'], args["status"])
         db.session.add(user)
         db.session.commit()
         
@@ -88,83 +89,6 @@ class AdminUserResource(Resource):
         return {"status": "Success deleted"}, 200, {'Content-Text':'application/json'}
 
 api.add_resource(AdminUserResource, '/admin/user', '/admin/user/<int:id>')
-
-class AdminClientResource(Resource):
-
-    @jwt_required
-    def get(self, id = None):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-        if id is None:
-            rows = []
-            output = dict()
-            for row in Clients.query.all():
-                rows.append(marshal(row, Clients.respond_field))
-            output["All Clients"] = rows
-            return output, 200, {'Content-Text':'application/json'}
-        else:
-            qry = Clients.query.get(id)
-            if qry is None:
-                return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-            return marshal(qry, Clients.respond_field), 200, {'Content-Text':'application/json'}
-
-    @jwt_required
-    def post(self):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', location = 'json')
-        parser.add_argument('password', location = 'json')
-        args = parser.parse_args()
-
-        client = Clients(None, args['username'], args['password'], "client")
-        db.session.add(client)
-        db.session.commit()
-        
-        return {"status": "Success Added Client Data"}, 200, {'Content-Text':'application/json'}
-
-    @jwt_required
-    def put(self, id):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', location = 'json')
-        parser.add_argument('password', location = 'json')
-        args = parser.parse_args()
-
-        qry = Clients.query.get(id)
-        if qry is None:
-            return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-        
-        if args['username'] is not None:
-            qry.username = args['username']
-        if args['password'] is not None:
-            qry.password = args["password"]
-        
-        db.session.commit()
-        return {"status": "Success Updated User Data"}, 200, {'Content-Text':'application/json'}
-    
-    @jwt_required
-    def delete(self, id):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-        
-        qry = Clients.query.get(id)
-        
-        if qry is None:
-            return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-
-        db.session.delete(qry)
-        db.session.commit()
-        return {"status": "Success deleted"}, 200, {'Content-Text':'application/json'}
-
-api.add_resource(AdminClientResource, '/admin/client', '/admin/client/<int:id>')
 
 class AdminProductsResource(Resource):
 
@@ -311,9 +235,123 @@ class AdminProductsResource(Resource):
 
 api.add_resource(AdminProductsResource, '/admin/product', '/admin/product/<int:id>')
 
-# Untuk pengembangan
-"""
-class AdminTransactionDetailsResource(Resource):
+class AdminProductTypeResource(Resource):
+
+    @jwt_required
+    def get(self, id = None):
+        jwtClaims = get_jwt_claims()
+        if jwtClaims['status'] != 'admin':
+            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+        if id is None:
+            rows = []
+            output = dict()
+            for row in Product_Types.query.all():
+                rows.append(marshal(row, Product_Types.respond_field))
+            output["status"] = "oke"
+            output["data"] = rows
+            return output, 200, {'Content-Text':'application/json'}
+        else:
+            qry = Product_Types.query.get(id)
+            if qry is None:
+                return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+            return marshal(qry, Product_Types.respond_field), 200, {'Content-Text':'application/json'}
+
+    # @jwt_required
+    def post(self):
+        # jwtClaims = get_jwt_claims()
+        # if jwtClaims['status'] != 'admin':
+        #     return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('nama', location = 'json')
+        args = parser.parse_args()
+
+        user = Product_Types(None, args['nama'], 0)
+        db.session.add(user)
+        db.session.commit()
+        return {"status": "oke"}, 200, {'Content-Text':'application/json'}
+
+    @jwt_required
+    def put(self, id):
+        jwtClaims = get_jwt_claims()
+        if jwtClaims['status'] != 'admin':
+            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('nama', location = 'json')
+        args = parser.parse_args()
+
+        qry = Product_Types.query.get(id)
+        if qry is None:
+            return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+        
+        if args['nama'] is not None:
+            qry.nama = args['nama']
+        
+        db.session.commit()
+        return {"status": "oke"}, 200, {'Content-Text':'application/json'}
+    
+    @jwt_required
+    def delete(self, id):
+        jwtClaims = get_jwt_claims()
+        if jwtClaims['status'] != 'admin':
+            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+        
+        qry = Product_Types.query.get(id)
+        
+        if qry is None:
+            return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+        db.session.delete(qry)
+        db.session.commit()
+        return {"status": "oke"}, 200, {'Content-Text':'application/json'}
+
+api.add_resource(AdminProductTypeResource, '/admin/product_type', '/admin/product_type/<int:id>')
+
+class AdminTransactionsResource(Resource):
+
+    @jwt_required
+    def get(self, id = None):
+        jwtClaims = get_jwt_claims()
+        if jwtClaims['status'] != 'admin':
+            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+
+        if id is None:
+            parser = reqparse.RequestParser()
+            parser.add_argument('p', type=int, location = 'args', default = 1)
+            parser.add_argument('rp', type=int, location = 'args', default = 5)
+
+            args = parser.parse_args()
+
+            offset = (args['p'] * args['rp']) - args['rp']
+            
+            output = dict()
+            qry = Transactions.query
+                
+            rows = []
+            for row in qry.limit(args['rp']).offset(offset).all():
+                rows.append(marshal(row, Transactions.respond_field))
+            
+            output["page"] = args['p']
+            output["total_page"] = 6 # round(Transactions.count()/args['rp'])
+            output["per_page"] = args['rp']
+            output["hasil"] = rows
+            
+            return output, 200, {'Content-Text':'application/json'}
+        else:
+            qry = Transactions.query.get(id)
+            output = dict()
+            if qry is not None:
+                output["page"] = args['p']
+                output["total_page"] = 6 # round(len(Ta)/args['rp'])
+                output["per_page"] = args['rp']
+                output["hasil"] = marshal(qry, Transactions.respond_field)
+                return output, 200, {'Content-Text':'application/json'} 
+        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+api.add_resource(AdminTransactionsResource, '/admin/transaction', '/admin/transaction/<int:id>')
+
+class AdminTransactionDetailResource(Resource):
 
     @jwt_required
     def get(self, id = None):
@@ -337,109 +375,22 @@ class AdminTransactionDetailsResource(Resource):
             for row in qry.limit(args['rp']).offset(offset).all():
                 rows.append(marshal(row, Transaction_Details.respond_field))
             
+            output["status"] = "oke"
             output["page"] = args['p']
-            output["total_page"] = 6 # round(Transaction_Details.count()/args['rp'])
+            output["total_page"] = 6 # round(Transactions.count()/args['rp'])
             output["per_page"] = args['rp']
-            output["hasil"] = rows
+            output["data"] = rows
             
             return output, 200, {'Content-Text':'application/json'}
         else:
             qry = Transaction_Details.query.get(id)
             output = dict()
             if qry is not None:
-                # output["page"] = args['p']
-                # output["total_page"] = 6 # round(len(Ta)/args['rp'])
-                # output["per_page"] = args['rp']
-                # output["hasil"] = marshal(qry, Transaction_Details.respond_field)
-                # return output, 200, {'Content-Text':'application/json'}
-                return marshal(qry, Transaction_Details.respond_field), 200, {'Content-Text':'application/json'} 
-        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-
-api.add_resource(AdminTransactionDetailsResource, '/admin/transaction_detail', '/admin/transaction_detail/<int:id>')
-
-class AdminTransactionsResource(Resource):
-
-    @jwt_required
-    def get(self, id = None):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-
-        if id is None:
-            parser = reqparse.RequestParser()
-            parser.add_argument('p', type=int, location = 'args', default = 1)
-            parser.add_argument('rp', type=int, location = 'args', default = 5)
-
-            args = parser.parse_args()
-
-            offset = (args['p'] * args['rp']) - args['rp']
-            
-            output = dict()
-            qry = Transactions.query
-                
-            rows = []
-            for row in qry.limit(args['rp']).offset(offset).all():
-                rows.append(marshal(row, Transactions.respond_field))
-            
-            output["page"] = args['p']
-            output["total_page"] = 6 # round(Transactions.count()/args['rp'])
-            output["per_page"] = args['rp']
-            output["hasil"] = rows
-            
-            return output, 200, {'Content-Text':'application/json'}
-        else:
-            qry = Transactions.query.get(id)
-            output = dict()
-            if qry is not None:
                 output["page"] = args['p']
                 output["total_page"] = 6 # round(len(Ta)/args['rp'])
                 output["per_page"] = args['rp']
-                output["hasil"] = marshal(qry, Transactions.respond_field)
+                output["data"] = marshal(qry, Transaction_Details.respond_field)
                 return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
-api.add_resource(AdminTransactionsResource, '/admin/transaction', '/admin/transaction/<int:id>')
-"""
-
-class AdminTransactionsResource(Resource):
-
-    @jwt_required
-    def get(self, id = None):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'admin':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-
-        if id is None:
-            parser = reqparse.RequestParser()
-            parser.add_argument('p', type=int, location = 'args', default = 1)
-            parser.add_argument('rp', type=int, location = 'args', default = 5)
-
-            args = parser.parse_args()
-
-            offset = (args['p'] * args['rp']) - args['rp']
-            
-            output = dict()
-            qry = Transactions.query
-                
-            rows = []
-            for row in qry.limit(args['rp']).offset(offset).all():
-                rows.append(marshal(row, Transactions.respond_field))
-            
-            output["page"] = args['p']
-            output["total_page"] = 6 # round(Transactions.count()/args['rp'])
-            output["per_page"] = args['rp']
-            output["hasil"] = rows
-            
-            return output, 200, {'Content-Text':'application/json'}
-        else:
-            qry = Transactions.query.get(id)
-            output = dict()
-            if qry is not None:
-                output["page"] = args['p']
-                output["total_page"] = 6 # round(len(Ta)/args['rp'])
-                output["per_page"] = args['rp']
-                output["hasil"] = marshal(qry, Transactions.respond_field)
-                return output, 200, {'Content-Text':'application/json'} 
-        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
-
-api.add_resource(AdminTransactionsResource, '/admin/transaction', '/admin/transaction/<int:id>')
+api.add_resource(AdminTransactionDetailResource, '/admin/t_detail', '/admin/t_detail/<int:id>')

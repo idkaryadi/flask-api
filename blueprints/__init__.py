@@ -47,13 +47,13 @@ def after_request(response):
 from blueprints.public.resources import bp_public
 from blueprints.user.resources import bp_user
 from blueprints.client.resources import bp_client
-# from blueprints.admin.resources import bp_admin
+from blueprints.admin.resources import bp_admin
 from blueprints.auth.resources import bp_auth
 
 app.register_blueprint(bp_user)
 app.register_blueprint(bp_public)
 app.register_blueprint(bp_client)
-# app.register_blueprint(bp_admin)
+app.register_blueprint(bp_admin)
 app.register_blueprint(bp_auth)
 
 db.create_all()
