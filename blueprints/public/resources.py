@@ -37,7 +37,7 @@ class PublicResource(Resource):
             output["page"] = args['p']
             output["total_page"] = 6 # round(Products.count()/args['rp'])
             output["per_page"] = args['rp']
-            output["hasil"] = rows
+            output["data"] = rows
             
             return output, 200, {'Content-Text':'application/json'}
         else:
@@ -112,7 +112,7 @@ class PublicProductTypeResource(Resource):
         output["page"] = args['p']
         output["total_page"] = 6 # round(Products.count()/args['rp'])
         output["per_page"] = args['rp']
-        output["data"] = rows
+        output["datas"] = rows
         
         return output, 200, {'Content-Text':'application/json'}
 
