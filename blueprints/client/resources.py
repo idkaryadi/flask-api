@@ -301,35 +301,3 @@ class ClientTransactionResource(Resource):
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
 api.add_resource(ClientTransactionResource, '/client/transaction/<int:id>')
-
-class ProductTypeResource(Resource):
-    def get(self, id = None):
- 
-        parser = reqparse.RequestParser()
-        parser.add_argument('p', type=int, location = 'args', default = 1)
-        parser.add_argument('rp', type=int, location = 'args', default = 20)
-        parser.add_argument('q', location = 'args', default = "")
-
-        args = parser.parse_args()
-
-        offset = (args['p'] * args['rp']) - args['rp']
-        
-        output = dict()
-        qry = Product_Types.query
-        if args['q'] is not "":
-            qry = qry.filter_by(nama=args['q'])
-            output["pencarian"] = args['q']
-            
-        rows = []
-        for row in qry.limit(args['rp']).offset(offset).all():
-            rows.append(marshal(row, Product_Types.respond_field))
-        
-        output["status"] = "oke"
-        output["page"] = args['p']
-        output["total_page"] = 6 # round(Products.count()/args['rp'])
-        output["per_page"] = args['rp']
-        output["data"] = rows
-        
-        return output, 200, {'Content-Text':'application/json'}
-
-api.add_resource(ProductTypeResource, '/product_type')

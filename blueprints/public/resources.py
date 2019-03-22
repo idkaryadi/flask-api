@@ -2,7 +2,7 @@ import logging, json
 from flask import Blueprint
 from flask_restful import Api, Resource, reqparse, marshal
 from blueprints import db
-from blueprints.client import Products
+from blueprints.client import *
 from blueprints.auth import *
 import json
 
@@ -45,7 +45,7 @@ class PublicResource(Resource):
 
             if qry is not None:
                 output['status'] = 'oke'
-                output["data"] = marshal(qry, Products.respond_field)
+                output["kategori"] = marshal(qry, Products.respond_field)
                 return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
@@ -87,18 +87,33 @@ class PublicProductByTypeResource(Resource):
 api.add_resource(PublicProductByTypeResource, '/public/kategori/<int:id>')
 
 class PublicProductTypeResource(Resource):
+    def get(self):
+ 
+        parser = reqparse.RequestParser()
+        parser.add_argument('p', type=int, location = 'args', default = 1)
+        parser.add_argument('rp', type=int, location = 'args', default = 20)
+        parser.add_argument('q', location = 'args', default = "")
 
-    def get(self, id):
-        qry = Product_Types.query
+        args = parser.parse_args()
+
+        offset = (args['p'] * args['rp']) - args['rp']
         
-        rows = []
-        for row in qry.all():
-            rows.append(marshal(row, Product_Types.respond_field))
         output = dict()
-        if qry is not None:
-            output["status"] = "oke"
-            output["data"] = rows # marshal(qry, Products.respond_field)
-            return output, 200, {'Content-Text':'application/json'} 
-        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+        qry = Product_Types.query
+        if args['q'] is not "":
+            qry = qry.filter_by(nama=args['q'])
+            output["pencarian"] = args['q']
+            
+        rows = []
+        for row in qry.limit(args['rp']).offset(offset).all():
+            rows.append(marshal(row, Product_Types.respond_field))
+        
+        output["status"] = "oke"
+        output["page"] = args['p']
+        output["total_page"] = 6 # round(Products.count()/args['rp'])
+        output["per_page"] = args['rp']
+        output["data"] = rows
+        
+        return output, 200, {'Content-Text':'application/json'}
 
-api.add_resource(PublicProductTypeResource, '/public/kategori')
+api.add_resource(PublicProductTypeResource, '/product_type')
