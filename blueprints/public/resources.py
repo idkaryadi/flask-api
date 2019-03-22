@@ -69,7 +69,7 @@ class PublicResource(Resource):
 
 api.add_resource(PublicResource, '/public', '/public/<int:id>')
 
-class PublicProductTypeResource(Resource):
+class PublicProductByTypeResource(Resource):
 
     def get(self, id):
         qry = Products.query.filter_by(product_type_id=id)
@@ -84,4 +84,21 @@ class PublicProductTypeResource(Resource):
             return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
-api.add_resource(PublicProductTypeResource, '/public/kategori/<int:id>')
+api.add_resource(PublicProductByTypeResource, '/public/kategori/<int:id>')
+
+class PublicProductTypeResource(Resource):
+
+    def get(self, id):
+        qry = Product_Types.query
+        
+        rows = []
+        for row in qry.all():
+            rows.append(marshal(row, Product_Types.respond_field))
+        output = dict()
+        if qry is not None:
+            output["status"] = "oke"
+            output["data"] = rows # marshal(qry, Products.respond_field)
+            return output, 200, {'Content-Text':'application/json'} 
+        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+api.add_resource(PublicProductTypeResource, '/public/kategori')

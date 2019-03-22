@@ -306,7 +306,8 @@ class AdminProductTypeResource(Resource):
         db.session.commit()
         return {"status": "oke"}, 200, {'Content-Text':'application/json'}
 
-api.add_resource(AdminProductTypeResource, '/admin/product_type', '/admin/product_type/<int:id>')
+# api.add_resource(AdminProductTypeResource, '/admin/product_type', '/admin/product_type/<int:id>')
+api.add_resource(AdminProductTypeResource, '/kategori', '/kategori/<int:id>')
 
 class AdminTransactionsResource(Resource):
 
