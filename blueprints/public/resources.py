@@ -113,7 +113,7 @@ class PublicProductTypeResource(Resource):
         output["page"] = args['p']
         output["total_page"] = 6 # round(Products.count()/args['rp'])
         output["per_page"] = args['rp']
-        output["datas"] = rows
+        output["data"] = rows
         
         return output, 200, {'Content-Text':'application/json'}
 
