@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ryuji:password@172.31.0.78:3306/WeekendProject'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ryuji:password@172.31.0.78:3306/WeekendProject'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ryuji:password@0.0.0.0:3306/WeekendProject'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'SADASsadsadsadsadSADsafaSAdsa0921'
