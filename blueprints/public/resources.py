@@ -56,13 +56,16 @@ class PublicResource(Resource):
         parser.add_argument('username', location = 'json')
         parser.add_argument('password', location = 'json')
         parser.add_argument('status', location = 'json')
+        parser.add_argument('gender', location = 'json')
+        parser.add_argument('email', location = 'json')
+        parser.add_argument('lokasi', location = 'json')
 
         args = parser.parse_args()
 
         if args['status'] not in ['user', 'client']: # admin hanya ditambahkan oleh admin
             return {"status": "input status invalid"}, 404, {'Content-Text':'application/json'}
         else:
-            new_row = Users(None, args['username'], args['password'], args['status'])
+            new_row = Users(None, args['username'], args['password'], args['gender'], args['lokasi'], args['email'])
         db.session.add(new_row)
         db.session.commit()
 
