@@ -5,9 +5,11 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from blueprints.auth import *
 from werkzeug.security import generate_password_hash, \
     check_password_hash
+from flask_cors import CORS
 
 bp_auth = Blueprint('auth', __name__)
 api = Api(bp_auth)
+CORS(bp_auth)
 
 class CreateTokenResources(Resource):
     def get(self):

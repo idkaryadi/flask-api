@@ -7,10 +7,11 @@ from blueprints.auth import *
 from blueprints.client import *
 from blueprints.user import *
 import math as ma
-
+from flask_cors import CORS
 from . import *
 
 bp_user = Blueprint('User', __name__)
+CORS(bp_user)
 api = Api(bp_user)
 
 # Bagian Resource untuk Users (#CLEAR)
@@ -38,6 +39,8 @@ class UserResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location = 'json')
         parser.add_argument('password', location = 'json')
+        parser.add_argument('email', location = 'json')
+        parser.add_argument('lokasi', location = 'json')
         args = parser.parse_args()
 
         user_id = jwtClaims["id"]
@@ -47,6 +50,10 @@ class UserResource(Resource):
         
         if args['username'] is not None:
             qry.username = args['username']
+        if args['lokasi'] is not None:
+            qry.lokasi = args['lokasi']
+        if args['email'] is not None:
+            qry.email = args['email']
         if args['password'] is not None:
             qry.password = args["password"]
         

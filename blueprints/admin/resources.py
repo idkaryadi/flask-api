@@ -6,11 +6,12 @@ from blueprints.auth import *
 from blueprints.client import *
 from blueprints.user import *
 from flask_jwt_extended import jwt_required, get_jwt_claims
-
+from flask_cors import CORS
 from . import *
 
 bp_admin = Blueprint('admin', __name__)
 api = Api(bp_admin)
+CORS(bp_admin)
 
 class AdminUserResource(Resource):
 

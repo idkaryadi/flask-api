@@ -5,11 +5,12 @@ from blueprints import db
 from blueprints.client import *
 from blueprints.auth import *
 import json
-
+from flask_cors import CORS
 from . import *
 
 bp_public = Blueprint('Public', __name__)
 api = Api(bp_public)
+CORS(bp_public)
 
 #Untuk Public
 class PublicResource(Resource):

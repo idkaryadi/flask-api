@@ -9,10 +9,11 @@ from flask_jwt_extended import jwt_required, get_jwt_claims
 from werkzeug.security import generate_password_hash, \
     check_password_hash
 import math as ma
-
+from flask_cors import CORS
 from . import *
 
 bp_client = Blueprint('client', __name__)
+CORS(bp_client)
 api = Api(bp_client)
 
 # Bagian Resource untuk Users
@@ -40,6 +41,8 @@ class ClientResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', location = 'json')
         parser.add_argument('password', location = 'json')
+        parser.add_argument('email', location = 'json')
+        parser.add_argument('lokasi', location = 'json')
         args = parser.parse_args()
 
         client_id = jwtClaims["id"]
@@ -49,6 +52,10 @@ class ClientResource(Resource):
 
         if args['username'] is not None:
             qry.username = args['username']
+        if args['lokasi'] is not None:
+            qry.lokasi = args['lokasi']
+        if args['email'] is not None:
+            qry.email = args['email']
         if args['password'] is not None:
             qry.password = generate_password_hash(args["password"])
         
@@ -132,6 +139,7 @@ class ClientProductsResource(Resource):
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
 
         client_id = jwtClaims['id']
+        lokasi = jwtClaims['lokasi']
         parser = reqparse.RequestParser()
         parser.add_argument('nama', location = 'json', required = True)
         parser.add_argument('deskripsi', location = 'json')
@@ -146,7 +154,7 @@ class ClientProductsResource(Resource):
 
         product = Products(
             None, args['nama'], args['deskripsi'], args['product_type_id'], args['price'],
-            args['satuan'], args['status'], args['url_picture'], args['qty'], client_id, 0)
+            args['satuan'], args['status'], args['url_picture'], args['qty'], client_id, lokasi, 0)
         db.session.add(product)
         db.session.commit()
         qry = Products.query.filter_by(client_id=client_id).order_by(Products.id.desc()).first()

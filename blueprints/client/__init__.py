@@ -17,6 +17,7 @@ class Products(db.Model):
     qty = db.Column(db.Integer, nullable=False)
     # berat = db.Column(db.Integer) pindah ke product_descriptions
     client_id = db.Column(db.Integer, nullable=False)
+    lokasi = db.Column(db.String(50))
     point = db.Column(db.Integer)
     # created_at = db.Column(db.DataTime)
     # updated_at = db.Column(db.DataTime)
@@ -35,6 +36,7 @@ class Products(db.Model):
         'qty' : fields.Integer,
         # 'berat' : fields.Integer,
         'client_id' : fields.Integer,
+        'lokasi': fields.String,
         'point' : fields.String
         # 'created_at' : fields.DataTime,
         # 'updated_at' : fields.DataTime,
@@ -43,7 +45,7 @@ class Products(db.Model):
 
     def __init__(
         self, id, nama, deskripsi, product_type_id, price, satuan, status, url_picture, qty, client_id,
-        point): # created_at, updated_at, deleted_at
+        lokasi, point): # created_at, updated_at, deleted_at
         self.id = id
         self.nama = nama
         self.deskripsi = deskripsi
@@ -54,6 +56,7 @@ class Products(db.Model):
         self.url_picture = url_picture
         self.qty = qty
         self.client_id = client_id
+        self.lokasi = lokasi
         self.point = point
         # self.created_at = created_at
         # self.updated_at = updated_at

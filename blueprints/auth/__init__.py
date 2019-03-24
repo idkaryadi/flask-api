@@ -12,6 +12,9 @@ class Users(db.Model):
     username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(10), nullable=False)
+    gender = db.Column(db.String(50))
+    lokasi = db.Column(db.String(50))
+    email = db.Column(db.String(50))
     # created_at = db.Column(db.DataTime)
     # updated_at = db.Column(db.DataTime)
     # deleted_at = db.Column(db.DataTime)
@@ -20,17 +23,23 @@ class Users(db.Model):
         'id' : fields.Integer,
         'username' : fields.String,
         # 'password' : fields.String,
-        'status' : fields.String
+        'status' : fields.String,
+        'gender' : fields.String,
+        'lokasi' : fields.String,
+        'email' : fields.String
         # 'created_at' : fields.DataTime,
         # 'updated_at' : fields.DataTime,
         # 'deleted_at' : fields.DataTime
     }
 
-    def __init__(self, id, username, password, status): # created_at, updated_at, deleted_at
+    def __init__(self, id, username, password, status, gender, lokasi, email): # created_at, updated_at, deleted_at
         self.id = id
         self.username = username
         self.password = generate_password_hash(password)
         self.status = status
+        self.gender = gender
+        self.lokasi = lokasi
+        self.email = email
         # self.created_at = created_at
         # self.updated_at = updated_at
         # self.deleted_at = deleted_at
