@@ -27,7 +27,7 @@ class PublicResource(Resource):
         if id is None: 
             qry = Products.query.order_by(Products.point.desc())
             if args['q'] is not "":
-                qry = qry.filter_by(nama=args['q'])
+                qry = qry.filter(Products.nama.like('%' + args['q'] + '%'))
                 # output["pencarian"] = args['q']
                 
             rows = []
