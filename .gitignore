@@ -122,5 +122,5 @@ dmypy.json
 
 ### Python Patch ###
 .venv/
-migrations/
+#migrations/
 # End of https://www.gitignore.io/api/python
