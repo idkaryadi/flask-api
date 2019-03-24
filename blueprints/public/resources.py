@@ -57,8 +57,8 @@ class PublicResource(Resource):
         parser.add_argument('password', location = 'json')
         parser.add_argument('status', location = 'json')
         parser.add_argument('gender', location = 'json')
-        parser.add_argument('email', location = 'json')
         parser.add_argument('lokasi', location = 'json')
+        parser.add_argument('email', location = 'json')
 
         args = parser.parse_args()
 
