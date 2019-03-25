@@ -22,10 +22,11 @@ class CreateTokenResources(Resource):
         if qry != None :
             validasi = check_password_hash(qry.password, args['password'])
             if not validasi:
-                return {'status':'UNAUTHORIZED', 'message':'invalid password'}, 401 
+                return {'status':'UNAUTHORIZED', 'message':'invalid password'}, 401
+            status = qry.status
             token = create_access_token(marshal(qry, Users.respond_field))
         else : 
             return {'status':'UNAUTHORIZED', 'message':'invalid username'}, 401
-        return {"status":"oke", 'token': token}, 200
+        return {"status":"oke", "statususer": status, 'token': token}, 200
 
 api.add_resource(CreateTokenResources, '/token')

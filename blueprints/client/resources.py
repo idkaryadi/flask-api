@@ -17,68 +17,68 @@ CORS(bp_client)
 api = Api(bp_client)
 
 # Bagian Resource untuk Users
-class ClientResource(Resource):
+# class ClientResource(Resource):
 
-    @jwt_required
-    def get(self):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'client':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
-        client_id = jwtClaims['id']
-        qry = Users.query.get(client_id)
-        if qry is None:
-            return {"message": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
-        # return jwtClaims, 200, {'Content-Text':'application/json'}
-        return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
+#     @jwt_required
+#     def get(self):
+#         jwtClaims = get_jwt_claims()
+#         if jwtClaims['status'] != 'client':
+#             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+#         client_id = jwtClaims['id']
+#         qry = Users.query.get(client_id)
+#         if qry is None:
+#             return {"message": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
+#         # return jwtClaims, 200, {'Content-Text':'application/json'}
+#         return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
 
-    @jwt_required
-    def put(self):
-        jwtClaims = get_jwt_claims()
+#     @jwt_required
+#     def put(self):
+#         jwtClaims = get_jwt_claims()
 
-        if jwtClaims['status'] != 'client':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+#         if jwtClaims['status'] != 'client':
+#             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
 
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', location = 'json')
-        parser.add_argument('password', location = 'json')
-        parser.add_argument('email', location = 'json')
-        parser.add_argument('lokasi', location = 'json')
-        args = parser.parse_args()
+#         parser = reqparse.RequestParser()
+#         parser.add_argument('username', location = 'json')
+#         parser.add_argument('password', location = 'json')
+#         parser.add_argument('email', location = 'json')
+#         parser.add_argument('lokasi', location = 'json')
+#         args = parser.parse_args()
 
-        client_id = jwtClaims["id"]
-        qry = Users.query.get(client_id)
-        if qry is None:
-            return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
+#         client_id = jwtClaims["id"]
+#         qry = Users.query.get(client_id)
+#         if qry is None:
+#             return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
 
-        if args['username'] is not None:
-            qry.username = args['username']
-        if args['lokasi'] is not None:
-            qry.lokasi = args['lokasi']
-        if args['email'] is not None:
-            qry.email = args['email']
-        if args['password'] is not None:
-            qry.password = generate_password_hash(args["password"])
+#         if args['username'] is not None:
+#             qry.username = args['username']
+#         if args['lokasi'] is not None:
+#             qry.lokasi = args['lokasi']
+#         if args['email'] is not None:
+#             qry.email = args['email']
+#         if args['password'] is not None:
+#             qry.password = generate_password_hash(args["password"])
         
-        db.session.commit()
-        return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
+#         db.session.commit()
+#         return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
     
-    @jwt_required
-    def delete(self):
-        jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'client':
-            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+#     @jwt_required
+#     def delete(self):
+#         jwtClaims = get_jwt_claims()
+#         if jwtClaims['status'] != 'client':
+#             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
         
-        client_id = jwtClaims["id"]
-        qry = Users.query.get(client_id)
+#         client_id = jwtClaims["id"]
+#         qry = Users.query.get(client_id)
 
-        if qry is None:
-            return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
+#         if qry is None:
+#             return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
 
-        db.session.delete(qry)
-        db.session.commit()
-        return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
+#         db.session.delete(qry)
+#         db.session.commit()
+#         return {"status": "oke", "data": marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
 
-api.add_resource(ClientResource, '/client')
+# api.add_resource(ClientResource, '/client')
 
 class ClientProductsResource(Resource):
 

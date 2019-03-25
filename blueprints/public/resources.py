@@ -46,7 +46,7 @@ class PublicResource(Resource):
 
             if qry is not None:
                 output['status'] = 'oke'
-                output["kategori"] = marshal(qry, Products.respond_field)
+                output["data"] = marshal(qry, Products.respond_field)
                 return output, 200, {'Content-Text':'application/json'} 
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 

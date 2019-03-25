@@ -20,7 +20,7 @@ class UserResource(Resource):
     @jwt_required
     def get(self):
         jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'user':
+        if jwtClaims['status'] not in ['user', 'client']:
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
         user_id = jwtClaims['id']
         qry = Users.query.get(user_id)
@@ -33,7 +33,7 @@ class UserResource(Resource):
     def put(self):
         jwtClaims = get_jwt_claims()
 
-        if jwtClaims['status'] != 'user':
+        if jwtClaims['status']  not in ['user', 'client']:
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
 
         parser = reqparse.RequestParser()
@@ -63,7 +63,7 @@ class UserResource(Resource):
     @jwt_required
     def delete(self):
         jwtClaims = get_jwt_claims()
-        if jwtClaims['status'] != 'user':
+        if jwtClaims['status']  not in ['user', 'client']
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
         
         user_id = jwtClaims["id"]
@@ -87,6 +87,7 @@ class UserTransactionDetailsResource(Resource):
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
 
         # user_id = jwtClaims['id']
+        #Transaction detail dari transaksi terakhir
         if id is None:
             parser = reqparse.RequestParser()
             parser.add_argument('p', type=int, location = 'args', default = 1)
@@ -100,11 +101,23 @@ class UserTransactionDetailsResource(Resource):
             user_id = jwtClaims["id"]
             qry = Transactions.query.filter_by(user_id = user_id).order_by(Transactions.id.desc()).first()
             td_qry = Transaction_Details.query.filter_by(transaction_id = qry.id)
-            
+
             rows = []
             total_page = 0
             for row in td_qry.limit(args['rp']).offset(offset).all():
-                rows.append(marshal(row, Transaction_Details.respond_field))
+                product_id = row.product_id
+                product_qry = Products.query.get(product_id)
+                nama_produk = product_qry.nama
+                url_gambar = product_qry.url_picture
+
+                product_type_id = product_qry.product_type_id
+                pt_qry = Product_Types.query.get(product_type_id)
+                kategori_produk = pt_qry.nama
+                tambahan = dict()
+                tambahan['nama_produk'] = nama_produk
+                tambahan["url_gambar"] = url_gambar
+                tambahan["kategori_produk"] = kategori_produk
+                rows.append({"ori":marshal(row, Transaction_Details.respond_field), "tambahan": tambahan})
                 # total_page = total_page + 1
 
             output["status"] = "oke"
