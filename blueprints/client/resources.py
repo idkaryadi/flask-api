@@ -114,7 +114,10 @@ class ClientProductsResource(Resource):
                 # get kategori name
                 product_type_id = row.product_type_id
                 pt_qry = Product_Types.query.get(product_type_id)
-                kategori_produk = pt_qry.nama
+                if pt_qry is None:
+                    kategori_produk = 0
+                else:
+                    kategori_produk = pt_qry.nama
                 tambahan = dict()
                 tambahan["kategori_produk"] = kategori_produk
 
