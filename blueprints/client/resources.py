@@ -115,9 +115,10 @@ class ClientProductsResource(Resource):
                 product_type_id = row.product_type_id
                 pt_qry = Product_Types.query.get(product_type_id)
                 kategori_produk = pt_qry.nama
+                tambahan = dict()
+                tambahan["kategori_produk"] = kategori_produk
 
                 # add kategori name
-                tambahan = {"kategori_produk":kategori_produk}
                 rows.append({"ori":marshal(row, Products.respond_field), "tambahan":tambahan})
                 total_page = total_page +1
 
