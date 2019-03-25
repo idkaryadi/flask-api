@@ -166,8 +166,7 @@ class ClientProductsResource(Resource):
         db.session.commit()
         qry = Products.query.filter_by(client_id=client_id).order_by(Products.id.desc()).first()
 
-        return {"status": "oke", "data":marshal(qry, Products.respond_field)},
-            200, {'Content-Text':'application/json'}
+        return {"status": "oke", "data":marshal(qry, Products.respond_field)}, 200, {'Content-Text':'application/json'}
 
     @jwt_required
     def put(self, id):
@@ -209,8 +208,7 @@ class ClientProductsResource(Resource):
             qry.qty = args['qty']
         
         db.session.commit()
-        return {"status": "oke", "data":marshal(qry, Products.respond_field)},
-            200, {'Content-Text':'application/json'}    
+        return {"status": "oke", "data":marshal(qry, Products.respond_field)}, 200, {'Content-Text':'application/json'}    
     
     @jwt_required
     def delete(self, id):
@@ -307,8 +305,7 @@ class ClientTransactionResource(Resource):
 
         product = Products.query.get(product_id)
         if product is None:
-            return {"status": "DATA_NOT_FOUND, this id not in your product"},
-                404, {'Content-Text':'application/json'}
+            return {"status": "DATA_NOT_FOUND, this id not in your product"}, 404, {'Content-Text':'application/json'}
         qry = Transactions.query.filter_by(product_id = product_id)
 
         if qry is not None:
