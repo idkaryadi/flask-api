@@ -282,7 +282,7 @@ class UserTransactionsResource(Resource):
             offset = (args['p'] * args['rp']) - args['rp']
             
             output = dict()
-            qry = Transactions.query.filter_by(user_id = user_id)
+            qry = Transactions.query.filter_by(user_id = user_id).order_by(Transactions.id.desc())
                 
             rows = []
             total_pages = 0
@@ -361,6 +361,25 @@ class UserTransactionsResource(Resource):
         return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
 
 api.add_resource(UserTransactionsResource, '/user/transaction', '/user/transaction/<int:id>')
+
+class LastTransactionsResource(Resource):
+
+    @jwt_required
+    def get(self, id = None):
+        jwtClaims = get_jwt_claims()
+        if jwtClaims['status'] != 'user':
+            return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
+
+        user_id = jwtClaims['id']
+        output = dict()
+        qry = Transactions.query.filter_by(user_id = user_id).order_by(Transactions.id.desc()).first()
+        if qry is not None:
+            output["status"] = "oke"
+            output["data"] = marshal(qry, Transactions.respond_field)
+            return output, 200, {'Content-Text':'application/json'} 
+        return {"status": "DATA_NOT_FOUND"}, 404, {'Content-Text':'application/json'}
+
+api.add_resource(LastTransactionsResource, '/lasttransaction')
 
 """
 SINGLE TRANSACTION

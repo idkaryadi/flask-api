@@ -111,7 +111,14 @@ class ClientProductsResource(Resource):
             rows = []
             total_page = 0
             for row in qry.limit(args['rp']).offset(offset).all():
-                rows.append(marshal(row, Products.respond_field))
+                # get kategori name
+                product_type_id = row.product_type_id
+                pt_qry = Product_Types.query.get(product_type_id)
+                kategori_produk = pt_qry.nama
+
+                # add kategori name
+                tambahan = {"kategori_produk":kategori_produk}
+                rows.append({"ori":marshal(row, Products.respond_field), "tambahan":tambahan})
                 total_page = total_page +1
 
             output['status'] = 'oke'
@@ -158,7 +165,9 @@ class ClientProductsResource(Resource):
         db.session.add(product)
         db.session.commit()
         qry = Products.query.filter_by(client_id=client_id).order_by(Products.id.desc()).first()
-        return {"status": "oke", "data":marshal(qry, Products.respond_field)}, 200, {'Content-Text':'application/json'}
+
+        return {"status": "oke", "data":marshal(qry, Products.respond_field)},
+            200, {'Content-Text':'application/json'}
 
     @jwt_required
     def put(self, id):
@@ -200,7 +209,8 @@ class ClientProductsResource(Resource):
             qry.qty = args['qty']
         
         db.session.commit()
-        return {"status": "oke", "data":marshal(qry, Products.respond_field)}, 200, {'Content-Text':'application/json'}    
+        return {"status": "oke", "data":marshal(qry, Products.respond_field)},
+            200, {'Content-Text':'application/json'}    
     
     @jwt_required
     def delete(self, id):
@@ -297,7 +307,8 @@ class ClientTransactionResource(Resource):
 
         product = Products.query.get(product_id)
         if product is None:
-            return {"status": "DATA_NOT_FOUND, this id not in your product"}, 404, {'Content-Text':'application/json'}
+            return {"status": "DATA_NOT_FOUND, this id not in your product"},
+                404, {'Content-Text':'application/json'}
         qry = Transactions.query.filter_by(product_id = product_id)
 
         if qry is not None:
