@@ -63,7 +63,7 @@ class UserResource(Resource):
     @jwt_required
     def delete(self):
         jwtClaims = get_jwt_claims()
-        if jwtClaims['status']  not in ['user', 'client']
+        if jwtClaims['status']  not in ['user', 'client']:
             return {"status": "Invalid Status"}, 404, {'Content-Text':'application/json'}
         
         user_id = jwtClaims["id"]
