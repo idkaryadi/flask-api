@@ -9,6 +9,8 @@ from blueprints.user import *
 import math as ma
 from flask_cors import CORS
 from . import *
+from werkzeug.security import generate_password_hash, \
+    check_password_hash
 
 bp_user = Blueprint('User', __name__)
 CORS(bp_user)
@@ -47,15 +49,15 @@ class UserResource(Resource):
         qry = Users.query.get(user_id)
         if qry is None:
             return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
-        
-        if args['username'] is not None:
+        # awalnya is not None, 
+        if args['username'] is not "":
             qry.username = args['username']
-        if args['lokasi'] is not None:
+        if args['lokasi'] is not "":
             qry.lokasi = args['lokasi']
-        if args['email'] is not None:
+        if args['email'] is not "":
             qry.email = args['email']
-        if args['password'] is not None:
-            qry.password = args["password"]
+        if args['password'] is not "":
+            qry.password = generate_password_hash(args["password"])
         
         db.session.commit()
         return {"status": "oke", 'data':marshal(qry, Users.respond_field)}, 200, {'Content-Text':'application/json'}
@@ -165,6 +167,8 @@ class UserTransactionDetailsResource(Resource):
         if args["qty"] > int(qry.qty) :
             return {"status": "Jumlah Produk Kurang"}, 404, {'Content-Text':'application/json'}
         sisa_qty = qry.qty - args["qty"]
+        if sisa_qty == 0:
+            qry.status = "Not Show"
         qry.qty = sisa_qty
 
         # get transcation id

@@ -115,7 +115,7 @@ class ClientProductsResource(Resource):
                 product_type_id = row.product_type_id
                 pt_qry = Product_Types.query.get(product_type_id)
                 if pt_qry is None:
-                    kategori_produk = 0
+                    kategori_produk = "Unknown"
                 else:
                     kategori_produk = pt_qry.nama
                 tambahan = dict()
