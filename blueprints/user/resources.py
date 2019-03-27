@@ -50,13 +50,13 @@ class UserResource(Resource):
         if qry is None:
             return {"status": "Your Account is deleted by your self"}, 404, {'Content-Text':'application/json'}
         # awalnya is not None, 
-        if args['username'] is not "":
+        if args['username'] is not None:
             qry.username = args['username']
-        if args['lokasi'] is not "":
+        if args['lokasi'] is not None:
             qry.lokasi = args['lokasi']
-        if args['email'] is not "":
+        if args['email'] is not None:
             qry.email = args['email']
-        if args['password'] is not "":
+        if args['password'] is not None:
             qry.password = generate_password_hash(args["password"])
         
         db.session.commit()
